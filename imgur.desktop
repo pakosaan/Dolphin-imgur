@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Service
+Actions=Upload2Imgur
+ServiceTypes=KonqPopupMenu/Plugin,image/*
+X-KDE-StartupNotify=false
+X-KDE-Priority=TopLevel
+
+[Desktop Action Upload2Imgur]
+Exec=$HOME/.local/bin/imgur %U
+Name=Upload to imgur.com
+Icon=/usr/share/pixmaps/imgur.png
