@@ -13,6 +13,7 @@
 ## For GUI:
 ---------
 You can find the option in context menu in dolphin window manager.
+![demo](https://i.imgur.com/o1TAINf.png)
 
 ## For CLI:
 --------
