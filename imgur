@@ -2,7 +2,6 @@
 
 # Required: curl , jq, qdbus(qt)
 
-#
 # Upload an image:
 # 	imgur /home/usename/Picture/ok.jpg
 # Upload an image to imgur.com and output its new URL to clipboard
@@ -12,6 +11,7 @@
 #apikey="1085e16a386ee42e786b72e6a7c51c0f9c96033e"
 
 # function to output usage instructions
+
 function usage {
 	echo "Usage: $(basename $0) <filename>
 Upload an image to imgur.com and output its new URL to clipboard and ~/.imgur_history" >&2
@@ -22,6 +22,7 @@ if [ ! -f $FILE ] ; then
   echo '{"token":""}' > $HOME/.config/imgur/config
 fi
 token=$(jq -r '.token' $FILE)
+
 # check arguments
 if [ "$1" = "-h" -o "$1" = "--help" ] ; then
 	usage
@@ -62,8 +63,6 @@ which qdbus >/dev/null 2>/dev/null || {
 kdialog --passivepopup "imgur: Uploading image ..." 3
 #response=$(curl -F "key=$apikey" -H "Expect: " -F "image=@$1" \
 #	http://imgur.com/api/upload.xml 2>/dev/null)
-# the "Expect: " header is to get around a problem when using this through the
-# Squid proxy. Not sure if it's a Squid bug or what.
 
 response=$(curl -H "Authorization:Bearer $token" -F "image=@$1" https://api.imgur.com/3/upload 2>/dev/null)
 if [ $? -ne 0 ]; then
