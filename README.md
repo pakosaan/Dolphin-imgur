@@ -1,5 +1,4 @@
 # This program upload image to imgur.com and output its URL to clipboard,
-#### Upload history will be stored in ~/.imgur_history.
 
 ## Install:
 --------
