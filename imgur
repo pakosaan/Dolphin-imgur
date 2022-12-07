@@ -5,7 +5,6 @@
 # Upload an image:
 # 	imgur /home/usename/Picture/ok.jpg
 # Upload an image to imgur.com and output its new URL to clipboard
-# Upload history stored in ~/.imgur_history
 
 # API Key provided by ubuntuku@ovi.com
 #apikey="1085e16a386ee42e786b72e6a7c51c0f9c96033e"
@@ -14,7 +13,8 @@
 
 function usage {
 	echo "Usage: $(basename $0) <filename>
-Upload an image to imgur.com and output its new URL to clipboard and ~/.imgur_history" >&2
+Upload an image to imgur.com and output its new URL to clipboard.
+The config is located at $HOME/.config/imgur/config Where you put the bearer token." >&2
 }
 FILE="$HOME/.config/imgur/config"
 if [ ! -f $FILE ] ; then
@@ -78,15 +78,10 @@ fi
 #url=$(echo $response | sed -r 's/.*<original_image>(.*)<\/original_image>.*/\1/')
 url=$(echo $response | jq -r '.data.link')
 #deleteurl=$(echo $response | sed -r 's/.*<delete_page>(.*)<\/delete_page>.*/\1/')
-deletehash=$(echo $response | jq -r '.data.deletehash')
-deleteurl=$(echo "https://api.imgur.com/3/image/$deletehash")
+#deletehash=$(echo $response | jq -r '.data.deletehash')
+#deleteurl=$(echo "https://api.imgur.com/3/image/$deletehash")
 
 
 qdbus org.kde.klipper /klipper org.kde.klipper.klipper.setClipboardContents "$url"
 
 kdialog --passivepopup "Done. Image link copied to the clipboard" 5
-echo >>$HOME/.imgur_history
-echo "Source image: $1" >>$HOME/.imgur_history
-echo "-------------" >>$HOME/.imgur_history
-echo "Direct Link: $url" >>$HOME/.imgur_history
-echo "Deletion Link: $deleteurl" >>$HOME/.imgur_history
