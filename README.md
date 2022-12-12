@@ -16,7 +16,8 @@ You can find the option in context menu in dolphin window manager.
 
 ## For CLI:
 --------
-The command is: `imgur <Image-URL>` . For more `imgur -h | --help`
+The command is: `imgur <Image-Path> <Image-Path> ....` . For more `imgur -h | --help`\
+`Note: `**You can pass more than one image as arguments.**
 
 **The URL of the uploded image will be copied in the clipboard. You can access the history of the clipboard in kde via `<SuperKey> + v`.**
 

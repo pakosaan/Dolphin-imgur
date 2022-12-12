@@ -12,8 +12,8 @@
 # function to output usage instructions
 
 function usage {
-	echo "Usage: $(basename $0) <filename>
-Upload an image to imgur.com and output its new URL to clipboard.
+	echo "Usage: $(basename $0) <filename> <filename> <filename> <filename> ....
+Upload an image to imgur.com and output its new URL to clipboard. You can pass one or more than one image to the arguments.
 The config is located at $HOME/.config/imgur/config Where you put the bearer token." >&2
 }
 FILE="$HOME/.config/imgur/config"
