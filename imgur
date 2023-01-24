@@ -1,105 +1,29 @@
-#!/bin/bash
+#!/usr/bin/env python3
 
-# Required: curl , jq, qdbus(qt)
+import asyncio
+import json
+import sys
+import os
+import aiohttp
+import subprocess
 
-# Upload an image:
-# 	imgur /home/usename/Picture/ok.jpg
-# Upload an image to imgur.com and output its new URL to clipboard
+async def upload_image(session, image_path):
+    async with session.post("https://api.imgur.com/3/upload", headers={"Authorization": f"Bearer {token}"}, data={"image": open(image_path, "rb")}) as response:
+        response_json = await response.json()
+        link = response_json["data"]["link"]
+        subprocess.run(["xclip", "-sel", "clip"], input=link, encoding='ascii')
+        print(f"Uploaded {image_path}, link copied to clipboard: {link}")
 
-# API Key provided by ubuntuku@ovi.com
-#apikey="1085e16a386ee42e786b72e6a7c51c0f9c96033e"
+async def main():
+    async with aiohttp.ClientSession() as session:
+        tasks = [upload_image(session, image) for image in image_paths]
+        await asyncio.gather(*tasks)
+    subprocess.run(["notify-send", "imgur", "All images have been uploaded!"])
 
-# function to output usage instructions
-
-function usage {
-	echo "Usage: $(basename $0) <filename> <filename> <filename> <filename> ....
-Upload an image to imgur.com and output its new URL to clipboard. You can pass one or more than one image to the arguments.
-The config is located at $HOME/.config/imgur/config Where you put the bearer token." >&2
-}
-FILE="$HOME/.config/imgur/config"
-if [ ! -f $FILE ] ; then
-  mkdir -p $HOME/.config/imgur/
-  echo '{"token":""}' > $HOME/.config/imgur/config
-fi
-token=$(jq -r '.token' $FILE)
-
-# check arguments
-# if [ "$1" = "-h" -o "$1" = "--help" ] ; then
-# 	usage
-# 	exit 0
-# elif [ $# -ne 1 ]; then
-# 	if [ $# == 0 ]; then
-# 		kdialog --error "No file specified"
-# 	else
-# 		kdialog --error "Unexpected arguments"
-# 	fi
-# 	exit 16
-# elif [ ! -f "$1" ]; then
-# 	kdialog --error "File \"$1\" not found"
-# 	exit 1
-# elif [[ ${token} == "" ]]; then
-#   kdialog --error "Invali Token inside $FILE "
-#   exit 1
-# fi
-
-# Alternative Check multiple argument
-
-if [ "$1" = "-h" -o "$1" = "--help" ] ; then
-	usage
-	exit 0
-
-elif [ $# == 0 ]; then
-	kdialog --error "No file specified"
-	exit 16
-# elif [ ! -f "$1" ]; then
-# 	kdialog --error "File \"$1\" not found"
-# 	exit 1
-elif [[ ${token} == "" ]]; then
-  kdialog --error "Invali Token inside $FILE "
-  exit 1
-fi
-
-# check curl is available
-which curl >/dev/null 2>/dev/null || {
-	kdialog --error "Couln't find curl, which is required."
-	exit 17
-}
-
-# check jq is available
-which jq >/dev/null 2>/dev/null || {
-	kdialog --error "Couln't find jq, which is required for json parsing."
-	exit 17
-}
-# check qdbus is available
-which qdbus >/dev/null 2>/dev/null || {
-	kdialog --error "Couln't find qdbus, which is required."
-	exit 17
-}
-
-# upload the image
-kdialog --passivepopup "imgur: Uploading image ..." 3
-#response=$(curl -F "key=$apikey" -H "Expect: " -F "image=@$1" \
-#	http://imgur.com/api/upload.xml 2>/dev/null)
-
-for img in "$@"
-do
-	response=$(curl -H "Authorization:Bearer $token" -F "image=@$img" https://api.imgur.com/3/upload 2>/dev/null)
-	if [ $? -ne 0 ]; then
-		kdialog --error "Upload failed"
-		exit 2
-	elif [ $(echo $response | grep -c "<error_msg>") -gt 0 ]; then
-		err1=$(echo $response | sed -r 's/.*<error_msg>(.*)<\/error_msg>.*/\1/')
-		kdialog --error "$err1"
-		exit 3
-	fi
-
-	# parse the response and output our stuff
-	#url=$(echo $response | sed -r 's/.*<original_image>(.*)<\/original_image>.*/\1/')
-	url=$(echo $response | jq -r '.data.link')
-	#deleteurl=$(echo $response | sed -r 's/.*<delete_page>(.*)<\/delete_page>.*/\1/')
-	#deletehash=$(echo $response | jq -r '.data.deletehash')
-	#deleteurl=$(echo "https://api.imgur.com/3/image/$deletehash")
-	qdbus org.kde.klipper /klipper org.kde.klipper.klipper.setClipboardContents "$url"
-	wait
-done
-kdialog --passivepopup "Done. $@ Image link copied to the clipboard" 5
+if __name__ == "__main__":
+    config_file_path = os.path.expanduser("~/.config/imgur/config")
+    with open(config_file_path, "r") as f:
+        config = json.load(f)
+        token = config["token"]
+    image_paths = sys.argv[1:]
+    asyncio.run(main())
