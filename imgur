@@ -5,20 +5,25 @@ import json
 import sys
 import os
 import aiohttp
+import pyperclip
 import subprocess
+
+icon_path = os.path.expanduser("~/.local/share/icons/hicolor/256x256/apps/imgur.png")
 
 async def upload_image(session, image_path):
     async with session.post("https://api.imgur.com/3/upload", headers={"Authorization": f"Bearer {token}"}, data={"image": open(image_path, "rb")}) as response:
         response_json = await response.json()
         link = response_json["data"]["link"]
-        subprocess.run(["xclip", "-sel", "clip"], input=link, encoding='ascii')
+        # subprocess.run(["xclip", "-sel", "clip"], input=link, encoding='ascii')
+        pyperclip.copy(link)
         print(f"Uploaded {image_path}, link copied to clipboard: {link}")
 
 async def main():
     async with aiohttp.ClientSession() as session:
         tasks = [upload_image(session, image) for image in image_paths]
         await asyncio.gather(*tasks)
-    subprocess.run(["notify-send", "imgur", "All images have been uploaded!"])
+    subprocess.run(["notify-send", "All Image uploaded", "-i", icon_path])
+
 
 if __name__ == "__main__":
     config_file_path = os.path.expanduser("~/.config/imgur/config")

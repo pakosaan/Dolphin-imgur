@@ -6,7 +6,7 @@ X-KDE-StartupNotify=false
 X-KDE-Priority=TopLevel
 
 [Desktop Action Upload2Imgur]
-Exec=imgur %U
+Exec=$HOME/.local/bin/imgur %U
 Name=Upload to imgur.com
 Name[nl]=Uploaden naar imgur.com
-Icon=/usr/share/pixmaps/imgur.png
+Icon=imgur
